@@ -38,7 +38,7 @@
     let timerInterval = null;
     let // secondsElapsed = 0; // keep time on reset
     const knightImg = new Image();
-    knightImg.src = 'knight.png';
+    knightImg.src = 'assets/knight.png';
 
     async function loadMaps() {
       const response = await fetch("maps/index.json");
@@ -179,7 +179,9 @@
 
       if (moveCount > countEnabledCells()) {
         stopTimer();
-        alert('성공! 모든 칸을 방문했습니다.');
+        const mins = Math.floor(secondsElapsed / 60);
+        const secs = secondsElapsed % 60;
+        alert(`성공! 모든 칸을 방문했습니다.\n소요 시간: ${mins}:${secs.toString().padStart(2, '0')}`);
       } else if (!hasValidMove()) {
         stopTimer();
         alert('실패! 더 이상 이동할 수 없습니다.');
