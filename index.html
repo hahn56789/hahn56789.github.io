@@ -51,12 +51,11 @@
 </style>
 </head>
 <body>
-  <h1>Knight's Tour</h1>
+  <h1>Knight's Tour (Web Version)</h1>
   <div id="controls">
     <button onclick="startGame()">Start Game</button>
     <button onclick="undoMove()">Undo</button>
     <button onclick="resetGame()">Reset</button>
-    <button onclick="backToMapSelection()">Back to Map Selection</button>
     <span id="timer" style="margin-left: 20px; font-weight: bold;"></span>
   </div>
   <div id="layout" style="margin-top: 20px;">
@@ -172,13 +171,7 @@
       }
     }
 
-    function backToMapSelection() {
-      stopTimer();
-      
-      grid.style.display = 'grid';
-      loadMaps();
-    }
-
+    
     function startTimer() {
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
