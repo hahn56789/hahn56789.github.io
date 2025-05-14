@@ -5,23 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Knight's Tour Web</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background: #fafafa;
-    }
-    canvas {
-      border: 2px solid #333;
-      margin-top: 10px;
-      display: none;
-    }
-    #controls {
-      margin: 20px;
-    }
-    button {
-      margin: 5px;
-      padding: 10px 20px;
-    }
+    body { font-family: sans-serif; text-align: center; background: #fafafa; }
+    canvas { border: 2px solid #333; margin-top: 10px; }
+    #controls { margin: 20px; }
+    button { margin: 5px; padding: 10px 20px; }
     .selected-map {
       outline: 3px solid red;
     }
@@ -52,7 +39,7 @@
     let timerInterval = null;
     let secondsElapsed = 0;
     let selectedMapName = null;
-    const grid = document.getElementById('mapGrid');
+    let grid = document.getElementById('mapGrid');
 
     const knightImg = new Image();
     knightImg.src = 'assets/knight.png';
@@ -60,62 +47,58 @@
     async function loadMaps() {
       const response = await fetch("maps/index.json");
       const maps = await response.json();
-      grid.innerHTML = '';
-      grid.style.display = 'grid';
+      
       grid.style.gridTemplateColumns = 'repeat(3, 160px)';
       grid.style.gap = '10px';
       grid.style.justifyContent = 'center';
-
-      for (const name of maps) {
+      grid.style.background = '#f9f9f9';
+      grid.style.padding = '10px';
+      grid.innerHTML = '';
+      maps.forEach(async name => {
+        console.log("Trying to load:", name);
         try {
           const res = await fetch(`maps/${encodeURIComponent(name)}.json`);
-          if (!res.ok) throw new Error(`${res.statusText}`);
+          if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
           const data = await res.json();
+          if (!data.mask) throw new Error("Missing mask data");
+          console.log("Loaded:", name, data.mask?.length, data.mask?.[0]?.length);
 
           const wrapper = document.createElement('div');
+        wrapper.style.background = '#fff';
+        wrapper.style.border = '1px solid #ccc';
+        wrapper.style.padding = '5px';
           wrapper.style.textAlign = 'center';
-          wrapper.style.background = '#fff';
-          wrapper.style.border = '1px solid #ccc';
-          wrapper.style.padding = '5px';
-
           const previewCanvas = document.createElement('canvas');
+        previewCanvas.style.border = '1px solid #999';
+        previewCanvas.style.background = '#eee';
           const tile = 20;
           previewCanvas.width = data.mask[0].length * tile;
           previewCanvas.height = data.mask.length * tile;
           const ctx2 = previewCanvas.getContext('2d');
-
-          ctx2.fillStyle = 'red';
-          ctx2.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
-
           for (let i = 0; i < data.mask.length; i++) {
             for (let j = 0; j < data.mask[i].length; j++) {
               if (data.mask[i][j]) {
-                ctx2.fillStyle = 'black';
+                ctx2.fillStyle = 'white';
                 ctx2.fillRect(j * tile, i * tile, tile, tile);
-                ctx2.strokeStyle = 'white';
                 ctx2.strokeRect(j * tile, i * tile, tile, tile);
               }
             }
           }
-
           previewCanvas.style.cursor = 'pointer';
-          previewCanvas.style.border = '1px solid #999';
-          previewCanvas.style.background = '#eee';
           previewCanvas.onclick = () => {
             document.querySelectorAll('.selected-map').forEach(el => el.classList.remove('selected-map'));
             previewCanvas.classList.add('selected-map');
             selectedMapName = name;
           };
-
           const label = document.createElement('div');
           label.textContent = name;
           wrapper.appendChild(previewCanvas);
           wrapper.appendChild(label);
           grid.appendChild(wrapper);
-        } catch (err) {
-          console.error(`❌ ${name} 렌더링 실패`, err);
+        } catch (e) {
+          console.error(`❌ ${name} 미리보기 로딩 실패:`, e);
         }
-      }
+      });
     }
 
     async function startGame() {
@@ -138,8 +121,8 @@
         moveHistory = [];
         startTimer();
         drawBoard();
-        grid.style.display = 'none';
-        canvas.style.display = 'block';
+        
+        
       } catch (e) {
         console.error("Failed to load map:", e);
         alert("맵 로딩 실패! 콘솔을 확인하세요.");
@@ -148,7 +131,7 @@
 
     function backToMapSelection() {
       stopTimer();
-      canvas.style.display = 'none';
+      
       grid.style.display = 'grid';
       loadMaps();
     }
