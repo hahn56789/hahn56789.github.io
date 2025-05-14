@@ -267,7 +267,9 @@
           if (visited[i][j] && (!current || !(i === current[0] && j === current[1]))) {
             ctx.fillStyle = 'black';
             ctx.font = `${Math.floor(tileSize * 0.4)}px sans-serif`;
-            ctx.fillText(visited[i][j], x + tileSize * 0.4, y + tileSize * 0.6);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(visited[i][j], x + tileSize / 2, y + tileSize / 2);
           }
         }
       }
