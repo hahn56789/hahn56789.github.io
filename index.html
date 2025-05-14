@@ -87,7 +87,8 @@
   #mapGrid > div:hover {
     transform: scale(1.05);
     transition: transform 0.2s ease;
-    border-color: #2d8cf0;
+    border: 2px solid #2d8cf0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
   .knight {
     font-size: 1.2em;
@@ -160,8 +161,16 @@ let solutionPath = null;
           wrapper.style.textAlign = 'center';
           const previewCanvas = document.createElement('canvas');
         previewCanvas.style.border = '1px solid #999';
-        previewCanvas.style.background = '#eee';
-          const tile = 20;
+        previewCanvas.style.background = '#fff';
+          previewCanvas.style.border = '1px solid #ccc';
+          previewCanvas.style.boxShadow = '0 1px 4px rgba(0,0,0,0.1)';
+          previewCanvas.style.marginBottom = '5px';
+          const previewSize = 120;
+          const rows = data.mask.length;
+          const cols = data.mask[0].length;
+          const tile = Math.floor(previewSize / Math.max(rows, cols));
+          previewCanvas.style.width = previewSize + 'px';
+          previewCanvas.style.height = previewSize + 'px';
           previewCanvas.width = data.mask[0].length * tile;
           previewCanvas.height = data.mask.length * tile;
           const ctx2 = previewCanvas.getContext('2d');
