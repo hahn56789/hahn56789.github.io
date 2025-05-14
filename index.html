@@ -5,41 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Knight's Tour Web</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background: #fafafa;
-    }
+    body { font-family: sans-serif; text-align: center; background: #fafafa; }
     canvas { border: 2px solid #333; margin-top: 10px; }
     #controls { margin: 20px; }
     button { margin: 5px; padding: 10px 20px; }
     .selected-map {
       outline: 3px solid red;
     }
-    #layout {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 20px;
-    margin-top: 20px;
-  }
-  #mapGrid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 480px;
-    overflow-y: auto;
-  }
-</style>
+  </style>
 </head>
 <body>
   <h1>Knight's Tour (Web Version)</h1>
-  
-  <div id="mapGrid"></div>
-  <div id="layout">
-    <canvas id="boardCanvas"></canvas>
-    <div id="mapGrid"></div>
+  <div id="controls">
+    <button onclick="startGame()">Start Game</button>
+    <button onclick="undoMove()">Undo</button>
+    <button onclick="resetGame()">Reset</button>
+    <button onclick="backToMapSelection()">Back to Map Selection</button>
+    <span id="timer" style="margin-left: 20px; font-weight: bold;"></span>
   </div>
+  <div id="mapGrid"></div>
+  <canvas id="boardCanvas"></canvas>
 
   <script>
     const canvas = document.getElementById('boardCanvas');
@@ -63,6 +48,7 @@
       const response = await fetch("maps/index.json");
       const maps = await response.json();
       
+      grid.style.display = 'grid';
       grid.style.gridTemplateColumns = 'repeat(3, 160px)';
       grid.style.gap = '10px';
       grid.style.justifyContent = 'center';
@@ -104,7 +90,6 @@
             document.querySelectorAll('.selected-map').forEach(el => el.classList.remove('selected-map'));
             previewCanvas.classList.add('selected-map');
             selectedMapName = name;
-            startGame();
           };
           const label = document.createElement('div');
           label.textContent = name;
