@@ -9,7 +9,10 @@
     canvas { border: 2px solid #333; margin-top: 10px; }
     #controls { margin: 20px; }
     button { margin: 5px; padding: 10px 20px; }
-  </style>
+    .selected-map {
+    outline: 3px solid red;
+  }
+</style>
 </head>
 <body>
   <h1>Knight's Tour (Web Version)</h1>
@@ -33,29 +36,59 @@
     let moveCount = 1;
     let moveHistory = [];
     let timerInterval = null;
-    let secondsElapsed = 0;
+    let // secondsElapsed = 0; // keep time on reset
     const knightImg = new Image();
     knightImg.src = 'knight.png';
 
     async function loadMaps() {
       const response = await fetch("maps/index.json");
       const maps = await response.json();
-      const select = document.getElementById('mapSelect');
-      maps.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        select.appendChild(option);
+      const controlDiv = document.getElementById('controls');
+      const grid = document.createElement('div');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(3, 160px)';
+      grid.style.gap = '10px';
+      grid.style.justifyContent = 'center';
+      maps.forEach(async name => {
+        const data = await fetch(`maps/${name}.json`).then(res => res.json());
+        const wrapper = document.createElement('div');
+        wrapper.style.textAlign = 'center';
+        const canvas = document.createElement('canvas');
+        const tile = 20;
+        canvas.width = data.mask[0].length * tile;
+        canvas.height = data.mask.length * tile;
+        const ctx2 = canvas.getContext('2d');
+        for (let i = 0; i < data.mask.length; i++) {
+          for (let j = 0; j < data.mask[i].length; j++) {
+            if (data.mask[i][j]) {
+              ctx2.fillStyle = 'white';
+              ctx2.fillRect(j * tile, i * tile, tile, tile);
+              ctx2.strokeRect(j * tile, i * tile, tile, tile);
+            }
+          }
+        }
+        canvas.style.cursor = 'pointer';
+        canvas.onclick = () => {
+          document.querySelectorAll('.selected-map').forEach(el => el.classList.remove('selected-map'));
+          canvas.classList.add('selected-map');
+          document.getElementById('mapSelect').value = name;
+          startGame();
+        };
+        const label = document.createElement('div');
+        label.textContent = name;
+        wrapper.appendChild(canvas);
+        wrapper.appendChild(label);
+        grid.appendChild(wrapper);
       });
+      controlDiv.appendChild(grid);
     }
 
     async function startGame() {
       const name = document.getElementById('mapSelect').value;
-      try {
-        const response = await fetch(`maps/${name}.json`);
+      stopTimer();
+      fetch(`maps/${name}.json`).then(async response => {
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const data = await response.json();
-        map = data.mask;
         tileSize = Math.floor(canvasSize / Math.max(map.length, map[0].length));
         canvas.width = tileSize * map[0].length;
         canvas.height = tileSize * map.length;
@@ -87,7 +120,10 @@
     }
 
     function resetGame() {
+      const savedTime = secondsElapsed;
       startGame();
+      secondsElapsed = savedTime;
+      startTimer();
     }
 
     function undoMove() {
