@@ -6,7 +6,7 @@
   <title>Knight's Tour Web</title>
   <style>
     body { font-family: sans-serif; text-align: center; }
-    canvas { border: 2px solid #333; margin-top: 10px; }
+    canvas { border: 2px solid #333; margin-top: 10px; display: none; }
     #controls { margin: 20px; }
     button { margin: 5px; padding: 10px 20px; }
     .selected-map {
@@ -20,8 +20,10 @@
     <button onclick="startGame()">Start Game</button>
     <button onclick="undoMove()">Undo</button>
     <button onclick="resetGame()">Reset</button>
+    <button onclick="backToMapSelection()">Back to Map Selection</button>
     <span id="timer" style="margin-left: 20px; font-weight: bold;"></span>
   </div>
+  <div id="mapGrid"></div>
   <canvas id="boardCanvas"></canvas>
 
   <script>
@@ -37,6 +39,7 @@
     let timerInterval = null;
     let secondsElapsed = 0;
     let selectedMapName = null;
+    let grid = document.getElementById('mapGrid');
 
     const knightImg = new Image();
     knightImg.src = 'assets/knight.png';
@@ -44,12 +47,11 @@
     async function loadMaps() {
       const response = await fetch("maps/index.json");
       const maps = await response.json();
-      const controlDiv = document.getElementById('controls');
-      const grid = document.createElement('div');
       grid.style.display = 'grid';
       grid.style.gridTemplateColumns = 'repeat(3, 160px)';
       grid.style.gap = '10px';
       grid.style.justifyContent = 'center';
+      grid.innerHTML = '';
       maps.forEach(async name => {
         const data = await fetch(`maps/${name}.json`).then(res => res.json());
         const wrapper = document.createElement('div');
@@ -80,7 +82,6 @@
         wrapper.appendChild(label);
         grid.appendChild(wrapper);
       });
-      controlDiv.appendChild(grid);
     }
 
     async function startGame() {
@@ -103,10 +104,19 @@
         moveHistory = [];
         startTimer();
         drawBoard();
+        grid.style.display = 'none';
+        canvas.style.display = 'block';
       } catch (e) {
         console.error("Failed to load map:", e);
         alert("맵 로딩 실패! 콘솔을 확인하세요.");
       }
+    }
+
+    function backToMapSelection() {
+      stopTimer();
+      canvas.style.display = 'none';
+      grid.style.display = 'grid';
+      loadMaps();
     }
 
     function startTimer() {
@@ -151,7 +161,7 @@
             ctx.fillRect(x, y, tileSize, tileSize);
             ctx.strokeRect(x, y, tileSize, tileSize);
           }
-          if (visited[i][j]) {
+          if (visited[i][j] && (!current || !(i === current[0] && j === current[1]))) {
             ctx.fillStyle = 'black';
             ctx.font = `${Math.floor(tileSize * 0.4)}px sans-serif`;
             ctx.fillText(visited[i][j], x + tileSize * 0.4, y + tileSize * 0.6);
