@@ -79,10 +79,13 @@
           for (let i = 0; i < data.mask.length; i++) {
             for (let j = 0; j < data.mask[i].length; j++) {
               if (data.mask[i][j]) {
-                ctx2.fillStyle = 'white';
-                ctx2.fillRect(j * tile, i * tile, tile, tile);
-                ctx2.strokeRect(j * tile, i * tile, tile, tile);
-              }
+              ctx2.fillStyle = 'white';
+              ctx2.fillRect(j * tile, i * tile, tile, tile);
+              ctx2.strokeRect(j * tile, i * tile, tile, tile);
+            } else {
+              ctx2.fillStyle = 'black';
+              ctx2.fillRect(j * tile, i * tile, tile, tile);
+            }
             }
           }
           previewCanvas.style.cursor = 'pointer';
