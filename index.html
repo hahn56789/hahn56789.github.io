@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Knight's Tour Web</title>
   <style>
-    body { font-family: sans-serif; text-align: center; }
+    body { font-family: sans-serif; text-align: center; background: #fafafa; }
     canvas { border: 2px solid #333; margin-top: 10px; display: none; }
     #controls { margin: 20px; }
     button { margin: 5px; padding: 10px 20px; }
@@ -51,6 +51,8 @@
       grid.style.gridTemplateColumns = 'repeat(3, 160px)';
       grid.style.gap = '10px';
       grid.style.justifyContent = 'center';
+      grid.style.background = '#f9f9f9';
+      grid.style.padding = '10px';
       grid.innerHTML = '';
       maps.forEach(async name => {
         console.log("Trying to load:", name);
@@ -62,8 +64,13 @@
           console.log("Loaded:", name, data.mask?.length, data.mask?.[0]?.length);
 
           const wrapper = document.createElement('div');
+        wrapper.style.background = '#fff';
+        wrapper.style.border = '1px solid #ccc';
+        wrapper.style.padding = '5px';
           wrapper.style.textAlign = 'center';
           const previewCanvas = document.createElement('canvas');
+        previewCanvas.style.border = '1px solid #999';
+        previewCanvas.style.background = '#eee';
           const tile = 20;
           previewCanvas.width = data.mask[0].length * tile;
           previewCanvas.height = data.mask.length * tile;
