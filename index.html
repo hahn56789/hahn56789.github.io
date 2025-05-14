@@ -157,7 +157,7 @@
 
     function resetGame() {
       const savedTime = secondsElapsed;
-      startGame();
+      selectedMapName && startGame();
       secondsElapsed = savedTime;
       startTimer();
     }
