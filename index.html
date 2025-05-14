@@ -178,10 +178,13 @@
           const x = j * tileSize;
           const y = i * tileSize;
           if (map[i][j]) {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(x, y, tileSize, tileSize);
-            ctx.strokeRect(x, y, tileSize, tileSize);
-          }
+          ctx.fillStyle = 'white';
+          ctx.fillRect(x, y, tileSize, tileSize);
+          ctx.strokeRect(x, y, tileSize, tileSize);
+        } else {
+          ctx.fillStyle = 'black';
+          ctx.fillRect(x, y, tileSize, tileSize);
+        }
           if (visited[i][j] && (!current || !(i === current[0] && j === current[1]))) {
             ctx.fillStyle = 'black';
             ctx.font = `${Math.floor(tileSize * 0.4)}px sans-serif`;
