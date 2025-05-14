@@ -45,61 +45,73 @@
     knightImg.src = 'assets/knight.png';
 
     async function loadMaps() {
-      const response = await fetch("maps/index.json");
-      const maps = await response.json();
-      grid.style.display = 'grid';
-      grid.style.gridTemplateColumns = 'repeat(3, 160px)';
-      grid.style.gap = '10px';
-      grid.style.justifyContent = 'center';
-      grid.style.background = '#f9f9f9';
-      grid.style.padding = '10px';
-      grid.innerHTML = '';
-      maps.forEach(async name => {
-        console.log("Trying to load:", name);
-        try {
-          const res = await fetch(`maps/${encodeURIComponent(name)}.json`);
-          if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
-          const data = await res.json();
-          if (!data.mask) throw new Error("Missing mask data");
-          console.log("Loaded:", name, data.mask?.length, data.mask?.[0]?.length);
+  const response = await fetch("maps/index.json");
+  const maps = await response.json();
+  const controlDiv = document.getElementById('controls');
+  const grid = document.getElementById('mapGrid');
+  grid.innerHTML = '';
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = 'repeat(3, 160px)';
+  grid.style.gap = '10px';
+  grid.style.justifyContent = 'center';
+  grid.style.background = '#f9f9f9';
+  grid.style.padding = '10px';
 
-          const wrapper = document.createElement('div');
-        wrapper.style.background = '#fff';
-        wrapper.style.border = '1px solid #ccc';
-        wrapper.style.padding = '5px';
-          wrapper.style.textAlign = 'center';
-          const previewCanvas = document.createElement('canvas');
-        previewCanvas.style.border = '1px solid #999';
-        previewCanvas.style.background = '#eee';
-          const tile = 20;
-          previewCanvas.width = data.mask[0].length * tile;
-          previewCanvas.height = data.mask.length * tile;
-          const ctx2 = previewCanvas.getContext('2d');
-          for (let i = 0; i < data.mask.length; i++) {
-            for (let j = 0; j < data.mask[i].length; j++) {
-              if (data.mask[i][j]) {
-                ctx2.fillStyle = 'white';
-                ctx2.fillRect(j * tile, i * tile, tile, tile);
-                ctx2.strokeRect(j * tile, i * tile, tile, tile);
-              }
-            }
+  for (const name of maps) {
+    console.log("Trying to load:", name);
+    try {
+      const res = await fetch(`maps/${encodeURIComponent(name)}.json`);
+      if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      if (!data.mask) throw new Error("Missing mask data");
+      console.log("Loaded:", name, data.mask.length, data.mask[0].length);
+
+      const wrapper = document.createElement('div');
+      wrapper.style.textAlign = 'center';
+      wrapper.style.background = '#fff';
+      wrapper.style.border = '1px solid #ccc';
+      wrapper.style.padding = '5px';
+
+      const previewCanvas = document.createElement('canvas');
+      const tile = 20;
+      previewCanvas.width = data.mask[0].length * tile;
+      previewCanvas.height = data.mask.length * tile;
+      const ctx2 = previewCanvas.getContext('2d');
+
+      // 테스트용 빨간 배경
+      ctx2.fillStyle = 'red';
+      ctx2.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+      for (let i = 0; i < data.mask.length; i++) {
+        for (let j = 0; j < data.mask[i].length; j++) {
+          if (data.mask[i][j]) {
+            ctx2.fillStyle = 'black';
+            ctx2.fillRect(j * tile, i * tile, tile, tile);
+            ctx2.strokeStyle = 'white';
+            ctx2.strokeRect(j * tile, i * tile, tile, tile);
           }
-          previewCanvas.style.cursor = 'pointer';
-          previewCanvas.onclick = () => {
-            document.querySelectorAll('.selected-map').forEach(el => el.classList.remove('selected-map'));
-            previewCanvas.classList.add('selected-map');
-            selectedMapName = name;
-          };
-          const label = document.createElement('div');
-          label.textContent = name;
-          wrapper.appendChild(previewCanvas);
-          wrapper.appendChild(label);
-          grid.appendChild(wrapper);
-        } catch (e) {
-          console.error(`❌ ${name} 미리보기 로딩 실패:`, e);
         }
-      });
+      }
+
+      previewCanvas.style.cursor = 'pointer';
+      previewCanvas.style.border = '1px solid #999';
+      previewCanvas.style.background = '#eee';
+      previewCanvas.onclick = () => {
+        document.querySelectorAll('.selected-map').forEach(el => el.classList.remove('selected-map'));
+        previewCanvas.classList.add('selected-map');
+        selectedMapName = name;
+      };
+
+      const label = document.createElement('div');
+      label.textContent = name;
+      wrapper.appendChild(previewCanvas);
+      wrapper.appendChild(label);
+      grid.appendChild(wrapper);
+    } catch (e) {
+      console.error(`❌ ${name} 미리보기 로딩 실패:`, e);
     }
+  }
+}
 
     async function startGame() {
       if (!selectedMapName) {
