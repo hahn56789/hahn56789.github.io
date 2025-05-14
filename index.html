@@ -77,6 +77,10 @@
       previewCanvas.width = data.mask[0].length * tile;
       previewCanvas.height = data.mask.length * tile;
       const ctx2 = previewCanvas.getContext('2d');
+      if (!ctx2) {
+        console.error("❌ getContext('2d') failed for", name);
+        continue;
+        }
 
       // 테스트용 빨간 배경
       ctx2.fillStyle = 'red';
