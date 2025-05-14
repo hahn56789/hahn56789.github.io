@@ -173,12 +173,14 @@
 
     function drawBoard() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const possibleMoves = current ? getKnightMoves(current) : [];
       for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
           const x = j * tileSize;
           const y = i * tileSize;
           if (map[i][j]) {
-          ctx.fillStyle = 'white';
+          const isPossibleMove = possibleMoves.some(([r, c]) => r === i && c === j && !visited[r][c]);
+          ctx.fillStyle = isPossibleMove ? '#d0ecff' : 'white';
           ctx.fillRect(x, y, tileSize, tileSize);
           ctx.strokeRect(x, y, tileSize, tileSize);
         } else {
@@ -234,6 +236,17 @@
 
     function countEnabledCells() {
       return map.flat().filter(c => c).length;
+    }
+
+    function getKnightMoves(pos) {
+      const [r, c] = pos;
+      const directions = [
+        [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+        [1, -2], [1, 2], [2, -1], [2, 1]
+      ];
+      return directions
+        .map(([dr, dc]) => [r + dr, c + dc])
+        .filter(([nr, nc]) => nr >= 0 && nr < map.length && nc >= 0 && nc < map[0].length && map[nr][nc]);
     }
 
     function hasValidMove() {
