@@ -35,7 +35,7 @@
     let timerInterval = null;
     let secondsElapsed = 0;
     const knightImg = new Image();
-    knightImg.src = 'assets/knight.png';
+    knightImg.src = 'knight.png';
 
     async function loadMaps() {
       const response = await fetch("maps/index.json");
@@ -106,9 +106,11 @@
         for (let j = 0; j < map[i].length; j++) {
           const x = j * tileSize;
           const y = i * tileSize;
-          ctx.fillStyle = map[i][j] ? 'white' : '#999';
+          if (map[i][j]) {
+          ctx.fillStyle = 'white';
           ctx.fillRect(x, y, tileSize, tileSize);
           ctx.strokeRect(x, y, tileSize, tileSize);
+        }
           if (visited[i][j]) {
             ctx.fillStyle = 'black';
             ctx.font = `${Math.floor(tileSize * 0.4)}px sans-serif`;
