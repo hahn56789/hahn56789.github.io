@@ -10,14 +10,13 @@
     #controls { margin: 20px; }
     button { margin: 5px; padding: 10px 20px; }
     .selected-map {
-    outline: 3px solid red;
-  }
-</style>
+      outline: 3px solid red;
+    }
+  </style>
 </head>
 <body>
   <h1>Knight's Tour (Web Version)</h1>
   <div id="controls">
-    <select id="mapSelect"></select>
     <button onclick="startGame()">Start Game</button>
     <button onclick="undoMove()">Undo</button>
     <button onclick="resetGame()">Reset</button>
@@ -36,7 +35,9 @@
     let moveCount = 1;
     let moveHistory = [];
     let timerInterval = null;
-    let // secondsElapsed = 0; // keep time on reset
+    let secondsElapsed = 0;
+    let selectedMapName = null;
+
     const knightImg = new Image();
     knightImg.src = 'assets/knight.png';
 
@@ -53,11 +54,11 @@
         const data = await fetch(`maps/${name}.json`).then(res => res.json());
         const wrapper = document.createElement('div');
         wrapper.style.textAlign = 'center';
-        const canvas = document.createElement('canvas');
+        const previewCanvas = document.createElement('canvas');
         const tile = 20;
-        canvas.width = data.mask[0].length * tile;
-        canvas.height = data.mask.length * tile;
-        const ctx2 = canvas.getContext('2d');
+        previewCanvas.width = data.mask[0].length * tile;
+        previewCanvas.height = data.mask.length * tile;
+        const ctx2 = previewCanvas.getContext('2d');
         for (let i = 0; i < data.mask.length; i++) {
           for (let j = 0; j < data.mask[i].length; j++) {
             if (data.mask[i][j]) {
@@ -67,16 +68,15 @@
             }
           }
         }
-        canvas.style.cursor = 'pointer';
-        canvas.onclick = () => {
+        previewCanvas.style.cursor = 'pointer';
+        previewCanvas.onclick = () => {
           document.querySelectorAll('.selected-map').forEach(el => el.classList.remove('selected-map'));
-          canvas.classList.add('selected-map');
-          document.getElementById('mapSelect').value = name;
-          startGame();
+          previewCanvas.classList.add('selected-map');
+          selectedMapName = name;
         };
         const label = document.createElement('div');
         label.textContent = name;
-        wrapper.appendChild(canvas);
+        wrapper.appendChild(previewCanvas);
         wrapper.appendChild(label);
         grid.appendChild(wrapper);
       });
@@ -84,11 +84,16 @@
     }
 
     async function startGame() {
-      const name = document.getElementById('mapSelect').value;
+      if (!selectedMapName) {
+        alert("먼저 맵을 선택해주세요.");
+        return;
+      }
       stopTimer();
-      fetch(`maps/${name}.json`).then(async response => {
+      try {
+        const response = await fetch(`maps/${selectedMapName}.json`);
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const data = await response.json();
+        map = data.mask;
         tileSize = Math.floor(canvasSize / Math.max(map.length, map[0].length));
         canvas.width = tileSize * map[0].length;
         canvas.height = tileSize * map.length;
@@ -96,7 +101,6 @@
         current = null;
         moveCount = 1;
         moveHistory = [];
-        secondsElapsed = 0;
         startTimer();
         drawBoard();
       } catch (e) {
@@ -143,10 +147,10 @@
           const x = j * tileSize;
           const y = i * tileSize;
           if (map[i][j]) {
-          ctx.fillStyle = 'white';
-          ctx.fillRect(x, y, tileSize, tileSize);
-          ctx.strokeRect(x, y, tileSize, tileSize);
-        }
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x, y, tileSize, tileSize);
+            ctx.strokeRect(x, y, tileSize, tileSize);
+          }
           if (visited[i][j]) {
             ctx.fillStyle = 'black';
             ctx.font = `${Math.floor(tileSize * 0.4)}px sans-serif`;
