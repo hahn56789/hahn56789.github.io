@@ -12,7 +12,43 @@
     .selected-map {
       outline: 3px solid red;
     }
-  </style>
+    #layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 20px;
+  }
+  #mapGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 160px);
+    gap: 10px;
+    max-height: 480px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 10px;
+  }
+  #layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 20px;
+  }
+  #mapGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 160px);
+    gap: 10px;
+    max-height: 480px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 10px;
+  }
+  #controls {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+</style>
 </head>
 <body>
   <h1>Knight's Tour (Web Version)</h1>
@@ -23,7 +59,9 @@
     <button onclick="backToMapSelection()">Back to Map Selection</button>
     <span id="timer" style="margin-left: 20px; font-weight: bold;"></span>
   </div>
+  <div id="layout" style="margin-top: 20px;">
   <div id="mapGrid"></div>
+    
   <canvas id="boardCanvas"></canvas>
 
   <script>
@@ -266,5 +304,6 @@
 
     loadMaps();
   </script>
+  </div>
 </body>
 </html>
