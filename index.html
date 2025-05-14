@@ -414,8 +414,10 @@ let solutionPath = null;
         ];
         for (const [dr, dc] of directions) {
           const nr = r + dr, nc = c + dc;
-          if (nr >= 0 && nr < N && nc >= 0 && nc < M &&
-              map[nr][nc] && !visitedCopy[nr][nc]) {
+          if (
+            nr >= 0 && nr < N && nc >= 0 && nc < M &&
+            map[nr][nc] && !visitedCopy[nr][nc]
+          ) {
             visitedCopy[nr][nc] = true;
             if (dfs(nr, nc, step + 1)) return true;
             visitedCopy[nr][nc] = false;
@@ -427,7 +429,7 @@ let solutionPath = null;
       visitedCopy[current[0]][current[1]] = true;
       const reachable = dfs(current[0], current[1], moveCount);
       alert(reachable ? "현재 상태에서 완주 가능합니다!" : "현재 위치에서는 완주할 수 없습니다.");
-    } 
+    }
     
 
     function hasValidMove() {
