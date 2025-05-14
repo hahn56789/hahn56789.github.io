@@ -29,25 +29,33 @@
     let moveCount = 1;
 
     async function loadMaps() {
-      const maps = ['square_5x5','square_6x6', 'square_7x7', 'square_8x8', 'diamond', 'cross_7x7','hallow_square','77 diamond'];
+      const response = await fetch("maps/index.json");
+      const maps = await response.json();
       const select = document.getElementById('mapSelect');
-      for (const name of maps) {
+      maps.forEach(name => {
         const option = document.createElement('option');
         option.value = name;
         option.textContent = name;
         select.appendChild(option);
-      }
+      });
     }
 
     async function startGame() {
       const name = document.getElementById('mapSelect').value;
-      const response = await fetch(`maps/${name}.json`);
-      const data = await response.json();
-      map = data.mask;
-      visited = map.map(row => row.map(() => false));
-      current = null;
-      moveCount = 1;
-      drawBoard();
+      try {
+        const response = await fetch(`maps/${name}.json`);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const data = await response.json();
+        console.log("Map loaded:", data.name);
+        map = data.mask;
+        visited = map.map(row => row.map(() => false));
+        current = null;
+        moveCount = 1;
+        drawBoard();
+      } catch (e) {
+        console.error("Failed to load map:", e);
+        alert("맵 로딩 실패! 콘솔을 확인하세요.");
+      }
     }
 
     function drawBoard() {
