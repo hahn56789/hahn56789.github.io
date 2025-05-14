@@ -16,17 +16,26 @@
   <div id="controls">
     <select id="mapSelect"></select>
     <button onclick="startGame()">Start Game</button>
+    <button onclick="undoMove()">Undo</button>
+    <button onclick="resetGame()">Reset</button>
+    <span id="timer" style="margin-left: 20px; font-weight: bold;"></span>
   </div>
-  <canvas id="boardCanvas" width="480" height="480"></canvas>
+  <canvas id="boardCanvas"></canvas>
 
   <script>
     const canvas = document.getElementById('boardCanvas');
     const ctx = canvas.getContext('2d');
-    const size = 60; // each tile size
+    const canvasSize = 480;
+    let tileSize = 60;
     let map = [];
     let visited = [];
     let current = null;
     let moveCount = 1;
+    let moveHistory = [];
+    let timerInterval = null;
+    let secondsElapsed = 0;
+    const knightImg = new Image();
+    knightImg.src = 'assets/knight.png';
 
     async function loadMaps() {
       const response = await fetch("maps/index.json");
@@ -46,11 +55,16 @@
         const response = await fetch(`maps/${name}.json`);
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const data = await response.json();
-        console.log("Map loaded:", data.name);
         map = data.mask;
+        tileSize = Math.floor(canvasSize / Math.max(map.length, map[0].length));
+        canvas.width = tileSize * map[0].length;
+        canvas.height = tileSize * map.length;
         visited = map.map(row => row.map(() => false));
         current = null;
         moveCount = 1;
+        moveHistory = [];
+        secondsElapsed = 0;
+        startTimer();
         drawBoard();
       } catch (e) {
         console.error("Failed to load map:", e);
@@ -58,19 +72,47 @@
       }
     }
 
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        secondsElapsed++;
+        const mins = Math.floor(secondsElapsed / 60);
+        const secs = secondsElapsed % 60;
+        document.getElementById('timer').textContent = `Time: ${mins}:${secs.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function resetGame() {
+      startGame();
+    }
+
+    function undoMove() {
+      if (moveHistory.length === 0) return;
+      const last = moveHistory.pop();
+      const [row, col] = current;
+      visited[row][col] = false;
+      moveCount--;
+      current = last;
+      drawBoard();
+    }
+
     function drawBoard() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
-          const x = j * size;
-          const y = i * size;
+          const x = j * tileSize;
+          const y = i * tileSize;
           ctx.fillStyle = map[i][j] ? 'white' : '#999';
-          ctx.fillRect(x, y, size, size);
-          ctx.strokeRect(x, y, size, size);
+          ctx.fillRect(x, y, tileSize, tileSize);
+          ctx.strokeRect(x, y, tileSize, tileSize);
           if (visited[i][j]) {
             ctx.fillStyle = 'black';
-            ctx.font = '20px sans-serif';
-            ctx.fillText(visited[i][j], x + 20, y + 35);
+            ctx.font = `${Math.floor(tileSize * 0.4)}px sans-serif`;
+            ctx.fillText(visited[i][j], x + tileSize * 0.4, y + tileSize * 0.6);
           }
         }
       }
@@ -78,30 +120,30 @@
     }
 
     function drawKnight(row, col) {
-      const x = col * size + 30;
-      const y = row * size + 30;
-      ctx.beginPath();
-      ctx.arc(x, y, 20, 0, 2 * Math.PI);
-      ctx.fillStyle = 'blue';
-      ctx.fill();
+      const x = col * tileSize + tileSize * 0.15;
+      const y = row * tileSize + tileSize * 0.15;
+      ctx.drawImage(knightImg, x, y, tileSize * 0.7, tileSize * 0.7);
     }
 
     canvas.addEventListener('click', e => {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const col = Math.floor(x / size);
-      const row = Math.floor(y / size);
+      const col = Math.floor(x / tileSize);
+      const row = Math.floor(y / tileSize);
       if (!map[row] || !map[row][col] || visited[row][col]) return;
       if (current && !isKnightMove(current, [row, col])) return;
 
       visited[row][col] = moveCount++;
+      moveHistory.push(current);
       current = [row, col];
       drawBoard();
 
       if (moveCount > countEnabledCells()) {
+        stopTimer();
         alert('성공! 모든 칸을 방문했습니다.');
       } else if (!hasValidMove()) {
+        stopTimer();
         alert('실패! 더 이상 이동할 수 없습니다.');
       }
     });
