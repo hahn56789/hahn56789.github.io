@@ -423,7 +423,7 @@ let solutionPath = null;
         }
 
         // ⛔️ 기존 visitedCopy[current[0]][current[1]] = true; 제거
-        if (dfs(current[0], current[1], moveCount)) {
+        if (dfs(current[0], current[1], moveCount-1)) {
             solutionPath = path.slice();
             animateSolution(solutionPath.slice(1));
         } else {
