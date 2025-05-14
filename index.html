@@ -1,1 +1,128 @@
-<p>hellow</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knight's Tour Web</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; }
+    canvas { border: 2px solid #333; margin-top: 10px; }
+    #controls { margin: 20px; }
+    button { margin: 5px; padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h1>Knight's Tour (Web Version)</h1>
+  <div id="controls">
+    <select id="mapSelect"></select>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+  <canvas id="boardCanvas" width="480" height="480"></canvas>
+
+  <script>
+    const canvas = document.getElementById('boardCanvas');
+    const ctx = canvas.getContext('2d');
+    const size = 60; // each tile size
+    let map = [];
+    let visited = [];
+    let current = null;
+    let moveCount = 1;
+
+    async function loadMaps() {
+      const maps = ['square_6x6', 'square_7x7', 'square_8x8', 'diamond_7x7', 'cross_7x7'];
+      const select = document.getElementById('mapSelect');
+      for (const name of maps) {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      }
+    }
+
+    async function startGame() {
+      const name = document.getElementById('mapSelect').value;
+      const response = await fetch(`maps/${name}.json`);
+      const data = await response.json();
+      map = data.mask;
+      visited = map.map(row => row.map(() => false));
+      current = null;
+      moveCount = 1;
+      drawBoard();
+    }
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < map.length; i++) {
+        for (let j = 0; j < map[i].length; j++) {
+          const x = j * size;
+          const y = i * size;
+          ctx.fillStyle = map[i][j] ? 'white' : '#999';
+          ctx.fillRect(x, y, size, size);
+          ctx.strokeRect(x, y, size, size);
+          if (visited[i][j]) {
+            ctx.fillStyle = 'black';
+            ctx.font = '20px sans-serif';
+            ctx.fillText(visited[i][j], x + 20, y + 35);
+          }
+        }
+      }
+      if (current) drawKnight(current[0], current[1]);
+    }
+
+    function drawKnight(row, col) {
+      const x = col * size + 30;
+      const y = row * size + 30;
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, 2 * Math.PI);
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+    }
+
+    canvas.addEventListener('click', e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const col = Math.floor(x / size);
+      const row = Math.floor(y / size);
+      if (!map[row] || !map[row][col] || visited[row][col]) return;
+      if (current && !isKnightMove(current, [row, col])) return;
+
+      visited[row][col] = moveCount++;
+      current = [row, col];
+      drawBoard();
+
+      if (moveCount > countEnabledCells()) {
+        alert('성공! 모든 칸을 방문했습니다.');
+      } else if (!hasValidMove()) {
+        alert('실패! 더 이상 이동할 수 없습니다.');
+      }
+    });
+
+    function isKnightMove(from, to) {
+      const dx = Math.abs(from[0] - to[0]);
+      const dy = Math.abs(from[1] - to[1]);
+      return (dx === 2 && dy === 1) || (dx === 1 && dy === 2);
+    }
+
+    function countEnabledCells() {
+      return map.flat().filter(c => c).length;
+    }
+
+    function hasValidMove() {
+      if (!current) return true;
+      const [r, c] = current;
+      const directions = [
+        [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+        [1, -2], [1, 2], [2, -1], [2, 1]
+      ];
+      return directions.some(([dr, dc]) => {
+        const nr = r + dr, nc = c + dc;
+        return nr >= 0 && nr < map.length && nc >= 0 && nc < map[0].length &&
+               map[nr][nc] && !visited[nr][nc];
+      });
+    }
+
+    loadMaps();
+  </script>
+</body>
+</html>
