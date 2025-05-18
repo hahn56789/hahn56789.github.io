@@ -318,10 +318,14 @@ solutionPath = null;
       drawBoard();
 
       if (moveCount > countEnabledCells()) {
-        stopTimer();
-        const mins = Math.floor(secondsElapsed / 60);
-        const secs = secondsElapsed % 60;
-        alert(`성공! 모든 칸을 방문했습니다.\n소요 시간: ${mins}:${secs.toString().padStart(2, '0')}`);
+  stopTimer();
+  const mins = Math.floor(secondsElapsed / 60);
+  const secs = secondsElapsed % 60;
+  alert(`성공! 모든 칸을 방문했습니다.
+소요 시간: ${mins}:${secs.toString().padStart(2, '0')}`);
+
+  const path = [...moveHistory.filter(p => p !== null), current];
+  drawPathLine(path);
       } else if (!hasValidMove()) {
         stopTimer();
         alert('실패! 더 이상 이동할 수 없습니다.');
@@ -527,7 +531,24 @@ solutionPath = null;
       alert(reachable ? "현재 상태에서 완주 가능합니다!" : "현재 위치에서는 완주할 수 없습니다.");
     } 
 
-    function hasValidMove() {
+    function drawPathLine(path) {
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  for (let i = 0; i < path.length; i++) {
+    const [r, c] = path[i];
+    const x = c * tileSize + tileSize / 2;
+    const y = r * tileSize + tileSize / 2;
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.stroke();
+}
+
+function hasValidMove() {
       if (!current) return true;
       const [r, c] = current;
       const directions = [
