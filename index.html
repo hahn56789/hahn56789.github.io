@@ -425,7 +425,7 @@ solutionPath = null;
 
         if (dfs(current[0], current[1], moveCount-1)) {
             solutionPath = path.slice();
-            const [nextR, nextC] = solutionPath[moveCount];
+            const [nextR, nextC] = solutionPath[1];
             ctx.globalAlpha = 0.5;
             ctx.drawImage(knightImg, nextC * tileSize + tileSize * 0.15, nextR * tileSize + tileSize * 0.15, tileSize * 0.7, tileSize * 0.7);
             ctx.globalAlpha = 1.0;
@@ -442,7 +442,7 @@ solutionPath = null;
 
         // 현재 위치와 정답 경로가 일치하는지 확인
         if (solutionPath && solutionPath.length === total && JSON.stringify(solutionPath[moveCount - 1]) === JSON.stringify(current)) {
-            animateSolution(solutionPath.slice(moveCount));
+            animateSolution(solutionPath.slice(1));
             return;
         }
 
@@ -468,7 +468,7 @@ solutionPath = null;
             return false;
         }
 
-        if (dfs(current[0], current[1], moveCount)) {
+        if (dfs(current[0], current[1], moveCount-1)) {
             solutionPath = path.slice();
             animateSolution(solutionPath.slice(moveCount));
         } else {
