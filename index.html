@@ -482,11 +482,14 @@ solutionPath = null;
     }
 
     function animateSolution(path) {
-      let step = 0;
-      const interval = setInterval(() => {
+  let step = 0;
+  const interval = setInterval(() => {
         if (step >= path.length) return clearInterval(interval);
         const [r, c] = path[step];
-        ctx.fillStyle = 'rgba(0, 128, 0, 0.5)';
+    ctx.fillStyle = 'white';
+    ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+    ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
+    ctx.fillStyle = 'rgba(0, 128, 0, 0.5)';
         ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
         ctx.strokeRect(c * tileSize, r * tileSize, tileSize, tileSize);
         ctx.fillStyle = 'white';
