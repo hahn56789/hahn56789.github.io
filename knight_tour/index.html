@@ -146,7 +146,7 @@ let solutionPath = null;
       grid.style.background = '#f9f9f9';
       grid.style.padding = '10px';
       grid.innerHTML = '';
-      maps.forEach(async name => {
+      for (const name of maps) {
         console.log("Trying to load:", name);
         try {
           const res = await fetch(`maps/${encodeURIComponent(name)}.json`);
@@ -156,43 +156,49 @@ let solutionPath = null;
           console.log("Loaded:", name, data.mask?.length, data.mask?.[0]?.length);
 
           const wrapper = document.createElement('div');
-        wrapper.style.background = '#fff';
-        wrapper.style.border = '1px solid #ccc';
-        wrapper.style.padding = '5px';
+          wrapper.style.background = '#fff';
+          wrapper.style.border = '1px solid #ccc';
+          wrapper.style.padding = '5px';
           wrapper.style.textAlign = 'center';
+
           const previewCanvas = document.createElement('canvas');
-        previewCanvas.style.border = '1px solid #999';
-        previewCanvas.style.background = '#fff';
+          previewCanvas.style.border = '1px solid #999';
+          previewCanvas.style.background = '#fff';
           previewCanvas.style.border = '1px solid #ccc';
           previewCanvas.style.boxShadow = '0 1px 4px rgba(0,0,0,0.1)';
           previewCanvas.style.marginBottom = '5px';
+
           const previewSize = 120;
           const rows = data.mask.length;
           const cols = data.mask[0].length;
           const tile = Math.floor(previewSize / Math.max(rows, cols));
+
           previewCanvas.style.width = previewSize + 'px';
           previewCanvas.style.height = previewSize + 'px';
-          previewCanvas.width = data.mask[0].length * tile;
-          previewCanvas.height = data.mask.length * tile;
+          previewCanvas.width = cols * tile;
+          previewCanvas.height = rows * tile;
+
           const ctx2 = previewCanvas.getContext('2d');
-          for (let i = 0; i < data.mask.length; i++) {
-            for (let j = 0; j < data.mask[i].length; j++) {
+          for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
               if (data.mask[i][j]) {
-              ctx2.fillStyle = 'white';
-              ctx2.fillRect(j * tile, i * tile, tile, tile);
-              ctx2.strokeRect(j * tile, i * tile, tile, tile);
-            } else {
-              ctx2.fillStyle = 'black';
-              ctx2.fillRect(j * tile, i * tile, tile, tile);
-            }
+                ctx2.fillStyle = 'white';
+                ctx2.fillRect(j * tile, i * tile, tile, tile);
+                ctx2.strokeRect(j * tile, i * tile, tile, tile);
+              } else {
+                ctx2.fillStyle = 'black';
+                ctx2.fillRect(j * tile, i * tile, tile, tile);
+              }
             }
           }
+
           previewCanvas.style.cursor = 'pointer';
           previewCanvas.onclick = () => {
             document.querySelectorAll('.selected-map').forEach(el => el.classList.remove('selected-map'));
             previewCanvas.classList.add('selected-map');
             selectedMapName = name;
           };
+
           const label = document.createElement('div');
           label.textContent = name;
           wrapper.appendChild(previewCanvas);
@@ -201,7 +207,7 @@ let solutionPath = null;
         } catch (e) {
           console.error(`❌ ${name} 미리보기 로딩 실패:`, e);
         }
-      });
+      }
     }
 
     async function startGame() {
